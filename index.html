@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mid-Size Model Showroom</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter for the main text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS for animations and specific styles -->
+    <style>
+        /* Sets the default font for the entire page */
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        /* Styling for the model card flip animation */
+        .card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* Progress bar animation */
+        .progress-bar-fill {
+            transition: width 1s ease-in-out;
+            width: 0%;
+        }
+
+        /* Typing effect cursor */
+        .typing-effect::after {
+            content: '|';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            from, to { color: transparent }
+            50% { color: #4f46e5; }
+        }
+
+        /* Custom slider thumb appearance */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #4f46e5;
+            cursor: pointer;
+            border-radius: 50%;
+            margin-top: -8px; 
+        }
+
+        input[type=range]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: #4f46e5;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Main Container -->
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <!-- Header Section -->
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Mid-Size Model Showroom</h1>
+            <p class="text-lg text-gray-600 mt-2">Llama-3-8B • Mistral-7B • Phi-3-mini</p>
+        </header>
+
+        <!-- Main Grid Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left Column: Model Selection and Details -->
+            <div class="lg:col-span-2 space-y-8">
+                
+                <!-- Model Selector Carousel -->
+                <section id="model-selector">
+                    <h2 class="text-2xl font-bold mb-4">1. Select a Model</h2>
+                    <div id="model-cards-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Model cards will be dynamically inserted here by JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Model Details Section (appears when a card is clicked) -->
+                <section id="model-details-section" class="hidden">
+                     <h2 class="text-2xl font-bold mb-4">Model Details</h2>
+                     <div id="model-details-content" class="bg-white p-6 rounded-lg shadow-md">
+                        <!-- Details will be dynamically inserted here -->
+                     </div>
+                </section>
+            </div>
+
+            <!-- Right Column: Interactive Tools -->
+            <div class="lg:col-span-1 space-y-8">
+
+                <!-- Hardware Requirements Slider -->
+                <section id="hardware-slider">
+                    <h2 class="text-2xl font-bold mb-4">2. Hardware Check</h2>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <label for="vram-slider" class="block font-medium text-gray-700">Available VRAM</label>
+                        <input id="vram-slider" type="range" min="4" max="32" value="8" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer mt-2">
+                        <div class="flex justify-between text-sm text-gray-500 mt-1">
+                            <span>4 GB</span>
+                            <span id="vram-value" class="font-bold text-indigo-600 text-lg">8 GB</span>
+                            <span>32 GB</span>
+                        </div>
+                        <p class="text-center mt-4 text-gray-600">Estimated Performance: <strong id="tokens-per-sec" class="text-indigo-600">~50 t/s</strong></p>
+                    </div>
+                </section>
+
+                <!-- License Filter -->
+                <section id="license-filter">
+                    <h2 class="text-2xl font-bold mb-4">3. Filter by License</h2>
+                    <div id="license-checkboxes" class="bg-white p-6 rounded-lg shadow-md space-y-3">
+                        <!-- Checkboxes will be dynamically inserted here -->
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Prompt Sandbox Section (Full Width) -->
+        <section id="prompt-sandbox" class="mt-8">
+            <h2 class="text-2xl font-bold mb-4">4. Prompt Sandbox</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Input Column -->
+                <div>
+                    <label for="prompt-input" class="block font-medium text-gray-700">Enter your prompt</label>
+                    <textarea id="prompt-input" rows="6" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="e.g., Write a short poem about space exploration."></textarea>
+                    <div class="mt-4 flex items-center gap-4">
+                        <select id="sandbox-model-selector" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            <!-- Model options will be populated by JS -->
+                        </select>
+                        <button id="generate-btn" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors">Generate</button>
+                    </div>
+                </div>
+                <!-- Output Column -->
+                <div>
+                    <label class="block font-medium text-gray-700">Generated Output</label>
+                    <div id="prompt-output" class="mt-1 p-3 h-48 bg-gray-100 rounded-md overflow-y-auto text-gray-800 sm:text-sm">
+                        <span class="text-gray-400">Output will appear here...</span>
+                    </div>
+                     <div id="latency-meter" class="mt-2 text-right text-sm text-gray-500"></div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Info Pop-up Modals (hidden by default) -->
+    <div id="swa-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
+            <button class="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            <h3 class="text-xl font-bold mb-3">Sliding Window Attention (SWA)</h3>
+            <p class="text-gray-600">Instead of looking at the entire context for every new word (which is computationally expensive), SWA focuses on a smaller, recent "window" of text. This allows models like Mistral-7B to handle very long sequences of text efficiently without needing massive amounts of memory, making it faster and more scalable for tasks like summarizing long documents.</p>
+        </div>
+    </div>
+
+    <div id="drp-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
+            <button class="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            <h3 class="text-xl font-bold mb-3">Dense Retrieval Pre-training</h3>
+            <p class="text-gray-600">This is a technique used to train a model to be very good at finding relevant information. During pre-training, the model is given a piece of text and taught to retrieve the most relevant document from a massive database. This makes models like Phi-3 exceptionally good at "open-book" question answering, where they can pull precise information from provided context.</p>
+        </div>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        // --- DATA STORE ---
+        // A single source of truth for all model data.
+        // This makes it easy to update or add new models in the future.
+        const modelData = {
+            'llama-3-8b': {
+                name: 'Llama-3 8B',
+                logo: 'https://placehold.co/100x100/f0a0a0/ffffff?text=L3',
+                params: '8B',
+                license: 'Non-Commercial',
+                licenseIcon: 'https://placehold.co/24x24/fca5a5/ffffff?text=NC',
+                vram_gb: 10, // VRAM needed to load the model
+                benchmarks: {
+                    mmlu: { name: 'MMLU', score: 68.4 },
+                    arc: { name: 'ARC', score: 79.5 }
+                },
+                performance: {
+                    latency_ms: 350, // Mock latency for sandbox
+                    tps_factor: 1.2 // Multiplier for token/sec calculation
+                },
+                info: null // No special info popup for this model
+            },
+            'mistral-7b': {
+                name: 'Mistral 7B',
+                logo: 'https://placehold.co/100x100/a0a0f0/ffffff?text=M7',
+                params: '7B',
+                license: 'Apache 2.0',
+                licenseIcon: 'https://placehold.co/24x24/93c5fd/ffffff?text=A2',
+                vram_gb: 8,
+                benchmarks: {
+                    mmlu: { name: 'MMLU', score: 60.1 },
+                    arc: { name: 'ARC', score: 78.9 }
+                },
+                performance: {
+                    latency_ms: 280,
+                    tps_factor: 1.5
+                },
+                info: {
+                    term: 'Sliding-Window Attention',
+                    modalId: 'swa-modal'
+                }
+            },
+            'phi-3-mini': {
+                name: 'Phi-3-mini',
+                logo: 'https://placehold.co/100x100/a0f0a0/ffffff?text=P3',
+                params: '3.8B',
+                license: 'MIT',
+                licenseIcon: 'https://placehold.co/24x24/a7f3d0/ffffff?text=MIT',
+                vram_gb: 5,
+                benchmarks: {
+                    mmlu: { name: 'MMLU', score: 69.0 },
+                    arc: { name: 'ARC', score: 84.0 }
+                },
+                performance: {
+                    latency_ms: 220,
+                    tps_factor: 2.0
+                },
+                info: {
+                    term: 'Dense Retrieval Pre-training',
+                    modalId: 'drp-modal'
+                }
+            }
+        };
+
+        const licenses = ['Apache 2.0', 'MIT', 'Non-Commercial'];
+
+        // --- DOM ELEMENT REFERENCES ---
+        // Caching DOM elements for performance and cleaner code.
+        const modelCardsContainer = document.getElementById('model-cards-container');
+        const modelDetailsSection = document.getElementById('model-details-section');
+        const modelDetailsContent = document.getElementById('model-details-content');
+        const vramSlider = document.getElementById('vram-slider');
+        const vramValue = document.getElementById('vram-value');
+        const tokensPerSec = document.getElementById('tokens-per-sec');
+        const licenseCheckboxesContainer = document.getElementById('license-checkboxes');
+        const promptInput = document.getElementById('prompt-input');
+        const sandboxModelSelector = document.getElementById('sandbox-model-selector');
+        const generateBtn = document.getElementById('generate-btn');
+        const promptOutput = document.getElementById('prompt-output');
+        const latencyMeter = document.getElementById('latency-meter');
+
+        let selectedModelId = null; // Tracks the currently selected model
+        let activeFilters = new Set(licenses); // Initially, all licenses are active
+
+        // --- INITIALIZATION FUNCTIONS ---
+
+        /**
+         * Creates and populates the model selection cards.
+         * This function runs once on page load.
+         */
+        function createModelCards() {
+            modelCardsContainer.innerHTML = ''; // Clear existing cards
+            Object.keys(modelData).forEach(id => {
+                const model = modelData[id];
+                const card = document.createElement('div');
+                card.id = `card-${id}`;
+                card.className = 'card p-4 bg-white rounded-lg shadow-md cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1';
+                card.dataset.modelId = id;
+
+                card.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <img src="${model.logo}" alt="${model.name} Logo" class="w-16 h-16 rounded-full border-2 border-gray-200">
+                        <div>
+                            <h3 class="text-xl font-bold">${model.name}</h3>
+                            <p class="text-gray-500">${model.params} Parameters</p>
+                        </div>
+                    </div>
+                `;
+                card.addEventListener('click', () => handleCardClick(id));
+                modelCardsContainer.appendChild(card);
+            });
+        }
+
+        /**
+         * Creates and populates the license filter checkboxes.
+         */
+        function createLicenseFilters() {
+            licenseCheckboxesContainer.innerHTML = '';
+            licenses.forEach(license => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center';
+                div.innerHTML = `
+                    <input id="filter-${license.replace(/\s+/g, '-')}" name="license-filter" type="checkbox" checked class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <label for="filter-${license.replace(/\s+/g, '-')}" class="ml-3 block text-sm font-medium text-gray-700">${license}</label>
+                `;
+                licenseCheckboxesContainer.appendChild(div);
+
+                div.querySelector('input').addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        activeFilters.add(license);
+                    } else {
+                        activeFilters.delete(license);
+                    }
+                    applyFilters();
+                });
+            });
+        }
+        
+        /**
+         * Populates the dropdown in the prompt sandbox.
+         */
+        function populateSandboxSelector() {
+            sandboxModelSelector.innerHTML = '';
+            Object.keys(modelData).forEach(id => {
+                const model = modelData[id];
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = model.name;
+                sandboxModelSelector.appendChild(option);
+            });
+        }
+
+
+        // --- EVENT HANDLERS & LOGIC ---
+
+        /**
+         * Handles clicking on a model card.
+         * It updates the UI to show details for the selected model.
+         * @param {string} id - The ID of the clicked model.
+         */
+        function handleCardClick(id) {
+            selectedModelId = id;
+            const model = modelData[id];
+            
+            // Update card styles
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('ring-2', 'ring-indigo-500'));
+            document.getElementById(`card-${id}`).classList.add('ring-2', 'ring-indigo-500');
+
+            // Show and populate details section
+            modelDetailsSection.classList.remove('hidden');
+            let infoHtml = '';
+            if (model.info) {
+                infoHtml = `
+                    <span class="text-sm text-gray-600 ml-2 cursor-pointer info-popup-trigger" data-modal-id="${model.info.modalId}">
+                        ${model.info.term} <span class="text-indigo-500">🔍</span>
+                    </span>
+                `;
+            }
+            
+            modelDetailsContent.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <h3 class="text-2xl font-bold">${model.name}</h3>
+                        ${infoHtml}
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <img src="${model.licenseIcon}" alt="${model.license}" class="w-6 h-6 rounded">
+                        <span class="text-sm font-medium text-gray-600">${model.license}</span>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    ${Object.values(model.benchmarks).map(bench => `
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-base font-medium text-gray-700">${bench.name}</span>
+                                <span class="text-sm font-medium text-indigo-600">${bench.score}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-indigo-600 h-2.5 rounded-full progress-bar-fill" data-score="${bench.score}"></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            // Trigger progress bar animations
+            // Using a timeout ensures the elements are in the DOM before we try to animate them.
+            setTimeout(() => {
+                modelDetailsContent.querySelectorAll('.progress-bar-fill').forEach(bar => {
+                    bar.style.width = `${bar.dataset.score}%`;
+                });
+            }, 100);
+            
+            // Add event listeners for new info popups
+            attachInfoPopupListeners();
+        }
+
+        /**
+         * Updates model card styles based on VRAM slider and license filters.
+         */
+        function applyFilters() {
+            const currentVram = parseInt(vramSlider.value);
+            Object.keys(modelData).forEach(id => {
+                const model = modelData[id];
+                const card = document.getElementById(`card-${id}`);
+                
+                const fitsVram = model.vram_gb <= currentVram;
+                const hasLicense = activeFilters.has(model.license);
+
+                // Reset styles
+                card.classList.remove('bg-red-100', 'border-red-400', 'bg-green-100', 'border-green-400', 'opacity-30', 'pointer-events-none');
+                
+                if (!hasLicense) {
+                    card.classList.add('opacity-30', 'pointer-events-none');
+                } else {
+                    if (fitsVram) {
+                        card.classList.add('bg-green-100', 'border-green-400');
+                    } else {
+                        card.classList.add('bg-red-100', 'border-red-400');
+                    }
+                }
+            });
+        }
+
+        /**
+         * Updates UI elements linked to the VRAM slider.
+         */
+        function handleSliderChange() {
+            const vram = vramSlider.value;
+            vramValue.textContent = `${vram} GB`;
+
+            // Simple formula to estimate tokens/second based on VRAM.
+            // This is a mock calculation for demonstration purposes.
+            const baseTps = 20;
+            const tps = baseTps + (vram - 4) * 5;
+            tokensPerSec.textContent = `~${tps.toFixed(0)} t/s`;
+
+            applyFilters();
+        }
+
+        /**
+         * Simulates generating text in the prompt sandbox.
+         */
+        function handleGenerate() {
+            const modelId = sandboxModelSelector.value;
+            const model = modelData[modelId];
+            const inputText = promptInput.value;
+
+            if (!inputText.trim()) {
+                promptOutput.innerHTML = `<span class="text-red-500">Please enter a prompt.</span>`;
+                return;
+            }
+
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Generating...';
+            promptOutput.innerHTML = '';
+            latencyMeter.textContent = '';
+
+            // Mock response text
+            const mockResponse = `Based on your prompt about "${inputText.substring(0, 20)}...", here is a creative response generated by ${model.name}. This model excels at tasks like this due to its architecture and training data. The quick brown fox jumps over the lazy dog.`;
+            
+            let i = 0;
+            const typingSpeed = 20; // ms per character
+
+            function typeWriter() {
+                if (i < mockResponse.length) {
+                    promptOutput.innerHTML += mockResponse.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, typingSpeed);
+                } else {
+                    generateBtn.disabled = false;
+                    generateBtn.textContent = 'Generate';
+                    latencyMeter.textContent = `Latency: ~${model.performance.latency_ms}ms`;
+                }
+            }
+            
+            // Add a class for the blinking cursor effect
+            promptOutput.classList.add('typing-effect');
+            setTimeout(typeWriter, model.performance.latency_ms); // Simulate initial latency
+        }
+
+        /**
+         * Attaches event listeners to info popup triggers and close buttons.
+         */
+        function attachInfoPopupListeners() {
+            document.querySelectorAll('.info-popup-trigger').forEach(trigger => {
+                trigger.onclick = (e) => {
+                    e.stopPropagation(); // Prevent card click event
+                    const modalId = trigger.dataset.modalId;
+                    document.getElementById(modalId).classList.remove('hidden');
+                };
+            });
+        }
+        
+        // --- MODAL HANDLING ---
+        document.querySelectorAll('.fixed.inset-0').forEach(modal => {
+            // Close modal by clicking the background
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+            // Close modal by clicking the 'X' button
+            modal.querySelector('button').addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+        });
+
+        // --- INITIAL SETUP CALLS ---
+        createModelCards();
+        createLicenseFilters();
+        populateSandboxSelector();
+        handleSliderChange(); // Initial call to set correct colors
+        
+        // --- EVENT LISTENERS ---
+        vramSlider.addEventListener('input', handleSliderChange);
+        generateBtn.addEventListener('click', handleGenerate);
+    });
+    </script>
+
+</body>
+</html>
